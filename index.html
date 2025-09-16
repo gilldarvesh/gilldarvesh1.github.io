@@ -1,92 +1,121 @@
+# Create a simple, modern CV website package that embeds the user's uploaded PDF
+import os, zipfile, textwrap, shutil, json, datetime, pathlib
+
+root = "/mnt/data/cv_site"
+os.makedirs(root, exist_ok=True)
+
+index_html = """<!doctype html>
 <html lang="en">
-<section class="panel">
-<h2>Experience</h2>
-<div class="item">
-<h3>Somerset Indus Capital Partners — PE Intern</h3>
-<div class="meta">Mumbai • Jan 2025 – Present</div>
-<ul>
-<li>Built investment thesis in healthcare services; sourced XX targets; created IC-ready models.</li>
-<li>Drove portfolio KPI dashboard and NDR/customer concentration analyses.</li>
-</ul>
-</div>
-<div class="item">
-<h3>Anthem Biosciences — Process Engineer</h3>
-<div class="meta">Bengaluru • 2019 – 2022</div>
-<ul>
-<li>Led tech transfer of 4 APIs from R&D to manufacturing; FMEA, vendor selection, validation.</li>
-<li>Cross‑functional client meetings with Fortune 500s; on‑time scale‑ups.</li>
-</ul>
-</div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darvesh Singh Gill — CV</title>
+  <meta name="description" content="Curriculum Vitae of Darvesh Singh Gill">
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#0f172a; --text:#e6e6f0; --muted:#9aa4b2;
+      --accent:#22d3ee; --border:#1e293b; --link:#38bdf8;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;line-height:1.6}
+    a{color:var(--link);text-decoration:none} a:hover{text-decoration:underline}
+    .wrap{max-width:980px;margin:40px auto;padding:0 20px}
+    header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
+    h1{font-size:1.9rem;margin:0}
+    .tagline{color:var(--muted);margin-top:4px}
+    .btns{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{background:var(--accent);color:#002b36;border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn.secondary{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:14px}
+    h2{font-size:1.1rem;margin:0 0 10px}
+    footer{margin:28px 0;color:var(--muted);font-size:.9rem;text-align:center}
+    .pdf-embed{aspect-ratio:4/3;width:100%;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#0b1020}
+    .notice{color:var(--muted);font-size:.95rem;margin-top:10px}
+    @media (max-width:680px){ .pdf-embed{aspect-ratio:auto;height:70vh} }
+    @media print{ body{background:#fff;color:#000} .panel{border:0} .btns, .notice{display:none} a{color:#000} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Darvesh Singh Gill</h1>
+        <div class="tagline">MBA (Class of 2026) · Finance | PE | Analytics</div>
+        <div class="tagline"><a href="mailto:you@example.com">you@example.com</a> · <a href="https://www.linkedin.com/in/your-handle">LinkedIn</a> · <a href="https://github.com/your-github">GitHub</a></div>
+      </div>
+      <div class="btns">
+        <a class="btn" href="Darvesh-Singh-Gill.pdf" download>Download CV (PDF)</a>
+        <a class="btn secondary" href="#cv">Open CV</a>
+      </div>
+    </header>
 
+    <section class="panel">
+      <h2 id="cv">Curriculum Vitae</h2>
+      <div class="pdf-embed">
+        <object data="Darvesh-Singh-Gill.pdf" type="application/pdf" width="100%" height="100%">
+          <p>Your browser can't display PDFs inline. <a href="Darvesh-Singh-Gill.pdf">Click here to download the CV.</a></p>
+        </object>
+      </div>
+      <p class="notice">Tip: On GitHub Pages, some mobile browsers download the file instead of previewing it. The download button above always works.</p>
+    </section>
 
-<h2 id="projects" style="margin-top:18px">Selected Projects</h2>
-<div class="item">
-<h3>Gold / PL / CD Loans Market Strategy</h3>
-<div class="meta">Credit GTM • 2025</div>
-<ul>
-<li>MECE frameworks, state entry playbooks, loss & OPEX sensitivity models.</li>
-</ul>
-</div>
-<div class="item">
-<h3>Solar EaaS “Heliogreen”</h3>
-<div class="meta">Ops & Finance • 2024</div>
-<ul>
-<li>Subscription model, CAC/Payback model, interactive calculator prototype.</li>
-</ul>
-</div>
-</section>
+    <section class="panel">
+      <h2>About</h2>
+      <p>This single-page site is hosted with <strong>GitHub Pages</strong>. Replace contact links above and customize this section to add a short bio, skills, or links to projects.</p>
+    </section>
 
-
-<aside class="panel">
-<h2>Education</h2>
-<div class="item">
-<h3>BITSoM — MBA</h3>
-<div class="meta">2023 – 2025 • Finance, Ops, Strategy</div>
-</div>
-<div class="item">
-<h3>B.E. (Chem)</h3>
-<div class="meta">2014 – 2018</div>
-</div>
-
-
-<h2 style="margin-top:18px">Skills</h2>
-<div class="chips">
-<span class="chip">Financial Modeling</span>
-<span class="chip">Valuation</span>
-<span class="chip">SQL</span>
-<span class="chip">Python</span>
-<span class="chip">Excel</span>
-<span class="chip">FMEA</span>
-<span class="chip">Consulting Frameworks</span>
-</div>
-
-
-<h2 style="margin-top:18px">Certifications</h2>
-<div class="item">
-<h3>Six Sigma — Green Belt</h3>
-<div class="meta">2024</div>
-</div>
-
-
-<h2 style="margin-top:18px">Extras</h2>
-<div class="item">
-<ul>
-<li>Case comps, analytics projects, teaching/mentoring.</li>
-<li>Interests: PE, fintech, ops strategy.</li>
-</ul>
-</div>
-</aside>
-</main>
-
-
-<footer>
-© <span id="y"></span> Darvesh Singh Gill · Built with GitHub Pages
-</footer>
-</div>
-
-
-<script>
-document.getElementById('y').textContent = new Date().getFullYear();
-</script>
+    <footer>
+      © <span id="y"></span> Darvesh Singh Gill · Hosted on GitHub Pages
+    </footer>
+  </div>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
+"""
+
+readme_md = """# Darvesh Singh Gill — CV Site
+
+A minimal one-page website that embeds and links to the CV PDF. Built for GitHub Pages.
+
+## Quick start (GitHub Pages)
+
+1. Create a public repo on GitHub. For a personal site, name it `<your-username>.github.io`. For a project site, any name is fine.
+2. Upload the files from this folder (`index.html` and `Darvesh-Singh-Gill.pdf`).
+3. Open **Settings → Pages** in the repo. Set **Source** to “Deploy from a branch”, choose the `main` branch and root (`/`). Save.
+4. Your site will be live at:
+   - Personal site: `https://<your-username>.github.io/`
+   - Project site: `https://<your-username>.github.io/<repo-name>/`
+
+## Customize
+
+- Edit `index.html` to update email, LinkedIn, GitHub links, and the About section.
+- Replace the PDF file if you update your CV (keep the same filename or update the links in HTML).
+
+## Optional
+
+- Custom domain: add it under **Settings → Pages** and configure your DNS `CNAME` to `<your-username>.github.io`.
+"""
+
+# Write files
+with open(os.path.join(root, "index.html"), "w", encoding="utf-8") as f:
+    f.write(index_html)
+
+# Copy the user's uploaded PDF into the site folder (if present)
+src_pdf = "/mnt/data/Darvesh-Singh-Gill.pdf"
+dst_pdf = os.path.join(root, "Darvesh-Singh-Gill.pdf")
+if os.path.exists(src_pdf):
+    shutil.copy(src_pdf, dst_pdf)
+
+with open(os.path.join(root, "README.md"), "w", encoding="utf-8") as f:
+    f.write(readme_md)
+
+# Zip it up for easy download
+zip_path = "/mnt/data/cv-website.zip"
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    for folder, _, files in os.walk(root):
+        for name in files:
+            full = os.path.join(folder, name)
+            arc = os.path.relpath(full, root)
+            z.write(full, arcname=arc)
+
+zip_path
